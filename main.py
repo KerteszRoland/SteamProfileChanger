@@ -10,7 +10,7 @@ import json
 import os
 from os import environ
 from dotenv import load_dotenv
-
+import random
 
 load_dotenv()
 
@@ -88,12 +88,12 @@ names = ["József", "Árpád", "Brendon", "Lecsi <3", "I like your MOM", "Tomy",
 
 name_index = 1
 while True:
-    if name_index >= len(names)-1:
-        name_index = 0
+    name_index = random.randint(0, len(names))
+    pic_index = random.randint(0, len(pics))
     ChangeNameTo(names[name_index])
     print(f"Name Changed to: {names[name_index]}")
-    ChangePicTo(pics[name_index])
-    print(f"Pic Changed to: {pics[name_index]}")
+    ChangePicTo(pics[pic_index])
+    print(f"Pic Changed to: {pics[pic_index]}")
     sleep(60)
     name_index += 1
 
