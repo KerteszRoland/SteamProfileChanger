@@ -92,7 +92,6 @@ while True:
         name_index = 0
     ChangeNameTo(names[name_index])
     print(f"Name Changed to: {names[name_index]}")
-    sleep(2)
     ChangePicTo(pics[name_index])
     print(f"Pic Changed to: {pics[name_index]}")
     sleep(60)
