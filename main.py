@@ -44,6 +44,7 @@ service = Service(executable_path=ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 10)
 
+
 def FirstLogin():
     cookies = []
     driver.get("https://store.steampowered.com/login")
@@ -83,10 +84,10 @@ def ChangeNameTo(name):
 if "cookies.json" not in os.listdir():
     FirstLogin()
 
+
 pics = [os.path.abspath("Pics/"+x) for x in os.listdir("Pics/")]
 names = ["József", "Árpád", "Brendon", "Lecsi <3", "I like your MOM", "Tomy", "Bogi (lecsi <3)", "X Æ A-Xii", "OM"]
 
-name_index = 1
 while True:
     name_index = random.randint(0, len(names))
     pic_index = random.randint(0, len(pics))
@@ -94,8 +95,4 @@ while True:
     print(f"Name Changed to: {names[name_index]}")
     ChangePicTo(pics[pic_index])
     print(f"Pic Changed to: {pics[pic_index]}")
-    sleep(60)
-    name_index += 1
-
-
-
+    sleep(120)
