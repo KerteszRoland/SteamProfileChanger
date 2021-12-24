@@ -1,5 +1,5 @@
-from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -12,15 +12,16 @@ from os import environ
 from dotenv import load_dotenv
 import random
 
+
 load_dotenv()
 
 
-def SaveCookies(cookies_file ,cookies):
+def save_cookies(cookies_file, cookies):
     with open(cookies_file, "w") as f:
         json.dump(cookies, f)
 
 
-def AddCookiesFromFile(cookies_file, driver):
+def add_cookies_from_file(cookies_file, driver):
     with open(cookies_file, "r") as f:
         cookies = json.load(f)
         for cookie in cookies:
@@ -45,7 +46,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 10)
 
 
-def FirstLogin():
+def first_login():
     cookies = []
     driver.get("https://store.steampowered.com/login")
     driver.find_element(By.ID, "input_username").send_keys(environ.get("STEAM_USERNAME"))
@@ -59,20 +60,20 @@ def FirstLogin():
     cookies.extend(driver.get_cookies())
     wait.until(EC.presence_of_element_located((By.XPATH, r"//*[@id='global_actions']/a"))).click()
     cookies.extend(driver.get_cookies())
-    SaveCookies("cookies.json", cookies)
+    save_cookies("cookies.json", cookies)
 
 
-def ChangePicTo(pic_path):
+def change_pic_to(pic_path):
     driver.get("https://steamcommunity.com/id/T3slaSpaceX/edit/avatar")
-    AddCookiesFromFile("cookies.json", driver)
+    add_cookies_from_file("cookies.json", driver)
     driver.refresh()
     wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/div/div[1]/div[3]/div[2]/input"))).send_keys(pic_path)
     wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/div/div[2]/button[1]"))).click()
     
 
-def ChangeNameTo(name):
+def change_name_to(name):
     driver.get("https://steamcommunity.com/id/user/edit/info")
-    AddCookiesFromFile("cookies.json", driver)
+    add_cookies_from_file("cookies.json", driver)
     driver.refresh()
     input_field = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[3]/div[2]/div[1]/label/div[2]/input")))
     button = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[7]/button[1]")))
@@ -82,17 +83,18 @@ def ChangeNameTo(name):
    
 
 if "cookies.json" not in os.listdir():
-    FirstLogin()
+    first_login()
 
 
-pics = [os.path.abspath("Pics/"+x) for x in os.listdir("Pics/")]
+pics = [os.path.abspath("Pics/" + x) for x in os.listdir("Pics/")]
 names = ["József", "Árpád", "Brendon", "Lecsi <3", "I like your MOM", "Tomy", "Bogi (lecsi <3)", "X Æ A-Xii", "OM"]
+
 
 while True:
     name_index = random.randint(0, len(names))
     pic_index = random.randint(0, len(pics))
-    ChangeNameTo(names[name_index])
+    change_name_to(names[name_index])
     print(f"Name Changed to: {names[name_index]}")
-    ChangePicTo(pics[pic_index])
+    change_pic_to(pics[pic_index])
     print(f"Pic Changed to: {pics[pic_index]}")
     sleep(120)
