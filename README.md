@@ -5,6 +5,7 @@
  - Cookie saving
  - Change profile picture
  - Change display username
+ - Copy someone elses steam picture and name
 
 ## Setup:
  - Install Selenium (pip install selenium)
