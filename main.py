@@ -48,7 +48,7 @@ wait = WebDriverWait(driver, 10)
 
 def first_login():
     cookies = []
-    driver.get("https://store.steampowered.com/login")
+    driver.get("https://steamcommunity.com/login")
     driver.find_element(By.ID, "input_username").send_keys(environ.get("STEAM_USERNAME"))
     driver.find_element(By.ID, "input_password").send_keys(environ.get("STEAM_PASSWORD"))
     driver.find_element(By.XPATH, "//*[@id=\"login_btn_signin\"]/button").click()
@@ -64,7 +64,7 @@ def first_login():
 
 
 def change_pic_to(pic_path):
-    driver.get("https://steamcommunity.com/id/T3slaSpaceX/edit/avatar")
+    driver.get("https://steamcommunity.com/id/user/edit/avatar")
     add_cookies_from_file("cookies.json", driver)
     driver.refresh()
     wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/div/div[1]/div[3]/div[2]/input"))).send_keys(pic_path)
@@ -78,7 +78,7 @@ def change_name_to(name):
     input_field = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[3]/div[2]/div[1]/label/div[2]/input")))
     button = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[7]/button[1]")))
     input_field.clear()
-    input_field.send_keys(names[name_index])
+    input_field.send_keys(name)
     button.click()
    
 
@@ -87,14 +87,16 @@ if "cookies.json" not in os.listdir():
 
 
 pics = [os.path.abspath("Pics/" + x) for x in os.listdir("Pics/")]
-names = ["József", "Árpád", "Brendon", "Lecsi <3", "I like your MOM", "Tomy", "Bogi (lecsi <3)", "X Æ A-Xii", "OM"]
+names = ["Joe Biden", "Gordon Ramsy", "Simple", "Lecsi <3", "kennyS", "Happy holidays <3!", "Elon Musk the 2nd", "X Æ A-Xii", "OM"]
 
 
 while True:
-    name_index = random.randint(0, len(names))
-    pic_index = random.randint(0, len(pics))
+    name_index = random.randrange(0, len(names))
+    pic_index = random.randrange(0, len(pics))
     change_name_to(names[name_index])
     print(f"Name Changed to: {names[name_index]}")
     change_pic_to(pics[pic_index])
     print(f"Pic Changed to: {pics[pic_index]}")
     sleep(120)
+
+driver.quit()

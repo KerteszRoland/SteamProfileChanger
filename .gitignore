@@ -1,4 +1,7 @@
+.idea/
+__pycache__/
 Pics/
 cookies.json
 duo.py
-.idea/
+.env
+copy_ninja_dist/
