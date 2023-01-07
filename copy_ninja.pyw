@@ -33,6 +33,7 @@ def add_cookies_from_file(cookies_file, driver):
 
 
 chrome_options = Options()
+
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--resolution=1920x1080")
 chrome_options.add_argument("--no-sandbox")
@@ -43,39 +44,48 @@ chrome_options.add_argument("--disable-in-process-stack-traces")
 chrome_options.add_argument("--disable-logging")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--log-level=3")
+
 service = Service(executable_path=ChromeDriverManager().install())
 service.creationflags = CREATE_NO_WINDOW
 driver = webdriver.Chrome(service=service, options=chrome_options)
+wait = WebDriverWait(driver, 10)
+
+def get_steamId():
+    wait.until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[7]/div[1]/div/div[3]/a")))
+    href_tag = driver.find_element(By.XPATH,"/html/body/div[1]/div[7]/div[1]/div/div[3]/a").get_attribute("href")
+    steam_id = href_tag.split("https://steamcommunity.com/id/")[1].split("/")[0]
+    return steam_id
 
 
 def first_login():
-    driver.get("https://steamcommunity.com/login")
-    driver.find_element(By.ID, "input_username").send_keys(environ.get("STEAM_USERNAME"))
-    driver.find_element(By.ID, "input_password").send_keys(environ.get("STEAM_PASSWORD"))
-    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.ID, "rejectAllButton"))).click()
-    driver.find_element(By.XPATH, "//*[@id=\"login_btn_signin\"]/button").click()
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.ID, "twofactorcode_entry")))
-    code_2fa = simpledialog.askstring("Input", "Steam Guard code:", parent=root)
-    WebDriverWait(driver, 30).until(EC.visibility_of_element_located((By.ID, "twofactorcode_entry"))).send_keys(code_2fa)
-    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#login_twofactorauth_buttonset_entercode > div.auth_button.leftbtn"))).click()
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "profile_avatar_frame")))
-    save_cookies("cookies.json", driver.get_cookies())
-    
-    
+    cookies = []
+    driver.get("https://steamcommunity.com/login/home/?goto=login")
+    wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div[7]/div[4]/div[1]/div[1]/div/div/div/div[2]/div/form/div[1]/input")))
+    driver.find_element(By.XPATH, "/html/body/div[1]/div[7]/div[4]/div[1]/div[1]/div/div/div/div[2]/div/form/div[1]/input").send_keys(environ.get("STEAM_USERNAME"))
+    driver.find_element(By.XPATH, "/html/body/div[1]/div[7]/div[4]/div[1]/div[1]/div/div/div/div[2]/div/form/div[2]/input").send_keys(environ.get("STEAM_PASSWORD"))
+    driver.find_element(By.XPATH, "/html/body/div[1]/div[7]/div[4]/div[1]/div[1]/div/div/div/div[2]/div/form/div[4]/button").click()
+    wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='acceptAllButton']")))
+    print("Waiting for cookie popup..")
+    driver.find_element(By.XPATH, "//*[@id='acceptAllButton']").click()
+    print("CONFIRM YOUR LOGIN WITH YOUR PHONE!")
+    longwait.until(EC.presence_of_element_located((By.XPATH, r"//*[@id='responsive_page_template_content']/div[1]/div[2]/div/div/div/div[3]/div[2]/a")))
+    cookies.extend(driver.get_cookies())
+    save_cookies("cookies.json", cookies)
+    print("LOGGED IN!")
+
+
 def change_pic_to(pic_path):
-    driver.get("https://steamcommunity.com/id/user/edit/avatar")
-    add_cookies_from_file("cookies.json", driver)
+    driver.get(f"https://steamcommunity.com/id/{get_steamId()}/edit/avatar")
     driver.refresh()
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/div/div[1]/div[3]/div[2]/input"))).send_keys(pic_path)
-    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/div/div[2]/button[1]"))).click()
+    wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[3]/div[2]/div/div[1]/div[3]/div[2]/input"))).send_keys(pic_path)
+    wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[3]/div[2]/div/div[2]/button[1]"))).click()
     
 
 def change_name_to(name):
-    driver.get("https://steamcommunity.com/id/user/edit/info")
-    add_cookies_from_file("cookies.json", driver)
+    driver.get(f"https://steamcommunity.com/id/{get_steamId()}/edit/info")
     driver.refresh()
-    input_field = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[3]/div[2]/div[1]/label/div[2]/input")))
-    button = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[2]/div[2]/form/div[7]/button[1]")))
+    input_field = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[3]/div[2]/form/div[3]/div[2]/div[1]/label/div[2]/input")))
+    button = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='application_root']/div[3]/div[2]/form/div[7]/button[1]")))
     input_field.clear()
     input_field.send_keys(name)
     button.click()
@@ -83,7 +93,7 @@ def change_name_to(name):
 
 def get_profile_name_and_pic(link):
     driver.get(link)
-    display_name = WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, "actual_persona_name"))).text
+    display_name = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "actual_persona_name"))).text
         
     pic_element = driver.find_element(By.CLASS_NAME, 'playerAvatarAutoSizeInner').find_elements(By.TAG_NAME, "img")[-1]
     pic = pic_element.get_attribute("src")
@@ -104,6 +114,11 @@ def copy_profile():
 root = Tk()
 if "cookies.json" not in os.listdir():
     first_login()
+    
+driver.get("https://steamcommunity.com")
+add_cookies_from_file("cookies.json", driver)
+driver.refresh()
+
 entry = Entry(root, width=50)
 entry.pack()
 myButton = Button(root, text="Copy profile", command=copy_profile)
